@@ -16,9 +16,17 @@ Whenever developers check-in code in a shared repository, it is verified by an a
 
 # Steps
 ## 1. Setup a repository in bitbucket
+   Create a new repository in bitbucket and set up gitignore and other properties.
+   
 ## 2. Create a Google Play Store listing for your project and upload a build alpha release.
-## 3. Create a service account to access Google Play Developer API. Create a cloud project and download the google play store credentials..
-## 4. Create a properties file to save your keystore properties. Zip files and savet them in a file server.
+  Create playstore listing for the project and deploy first release in alpha channel.
+  
+## 3. Create a service account to access Google Play Developer API. Create a cloud project and download the google play store credentials.
+  We will need a service account to allow an application to deply release on behalf of us.
+  Follow [this link](https://developers.google.com/android/management/service-account) to create a service account.
+  
+## 4. Create a properties file to save your keystore properties. Zip files and save them in your file server.
+
 ## 5. Write custom tasks to download and extract these files in build directory.
 
   1. Create a blank keystore.properties file in the root directory.
@@ -30,12 +38,30 @@ Whenever developers check-in code in a shared repository, it is verified by an a
 ```
   3. Add extract task.
   4. Add task to write keystore properties to local file.
+  
 ## 6. Setup build types. (Release and debug) Debug builds won’t get signed.
+
 ## 7. Setup signin config. 
   1. Create a global variable for KeyStore Properties.
   2. Load the keystore.properties file in variable.
   3. Set the signing credentials
-
+ ```groovy
+ 
+  android {
+    ...
+     signingConfigs {
+        release {
+            keystoreProperties.load(new FileInputStream(file("${project.rootDir}/keystore.properties")))
+            storeFile file('build/MyKey.jks')
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    ...
+    }
+ ```
+ 
 ## 8. Enable bitbucket pipeline
   1. Open your repository on bitbucket.org for which you want to implement CI.
   2. Click on pipeline icon, choose language template as Java (Gradle) and add the following YAML script to it and commit changes.
