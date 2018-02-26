@@ -1,0 +1,85 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.github.triplet.play'
+import de.undercouch.gradle.tasks.download.Download
+
+def keystoreProperties = new Properties()
+
+android {
+
+    playAccountConfigs {
+        defaultAccountConfig {
+            jsonFile = file('build/playstore_credentials.json')
+        }
+    }
+
+    signingConfigs {
+        release {
+            keystoreProperties.load(new FileInputStream(file("${project.rootDir}/keystore.properties")))
+            storeFile file('build/MyKey.jks')
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
+
+    defaultConfig {
+        applicationId "...."
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode 10
+        versionName "10.0"
+        playAccountConfig = playAccountConfigs.defaultAccountConfig
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions "release_channel"
+    productFlavors {
+        uat {
+            dimension "release_channel"
+            buildConfigField 'String', 'URL_ROOT', '"uat url"'
+        }
+
+        production {
+            dimension "release_channel"
+            buildConfigField 'String', 'URL_ROOT', '"production url"'
+        }
+    }
+
+    task downloadZipFile(type: Download) {
+        src 'downloadable_url_of_file_server'
+        dest new File(buildDir, 'ci.secret.zip')
+    }
+
+    task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
+        from zipTree(downloadZipFile.dest)
+        into buildDir
+    }
+
+    task setupKeyStoreProperties(dependsOn: downloadAndUnzipFile) {
+        doLast {
+            def toConcatenate = file("build/keystore.properties")
+            def output = file("${project.rootDir}/keystore.properties")
+            output << toConcatenate.text
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+}
