@@ -11,8 +11,8 @@ Whenever developers check-in code in a shared repository, it is verified by an a
 2. Create and sign a release builds of Production flavor upon closing a release branch and publish it on Google Play Store.
 
 # Prerequisite
-1. Basic knowledge of YAML [1](https://learn.getgrav.org/advanced/yaml).
-2. Basic knowledge of bash scripts [2](https://learn.getgrav.org/advanced/yaml).
+1. Basic knowledge of [YAML](https://learn.getgrav.org/advanced/yaml).
+2. Basic knowledge of [bash scripts](https://learn.getgrav.org/advanced/yaml).
 
 # Steps
 ## 1. Setup a repository in bitbucket
